@@ -4,13 +4,20 @@ version = "0.1.0"
 description = "Conway’s Game of Life – fullscreen graphical demo"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
-
-[dependencies]
-pygame = "*"
-
-[tool.uv]
-dev-dependencies = [
-    "pytest>=8.0",
-    "mypy>=1.10",
+dependencies = [
+    "pygame>=2.6.1",      # adjust to the latest stable release
 ]
+
+#[tool.uv]
+# If you need uv‑specific settings, put them here
+# e.g. package‑version = "0.5.0"
+
+#[tool.uv.dependency-groups]
+#dev = [
+#    "pytest>=8.0.0",
+#    "mypy>=1.10.0",
+#]
+
+#[build-system]
+#requires = ["uv>=0.4.0"]
+#build-backend = "uv.build"

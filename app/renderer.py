@@ -1,6 +1,6 @@
 # app/renderer.py
 import pygame
-from .config import *
+from config import *
 
 def render_grid(surface: pygame.Surface, grid, cell_size: int):
     """Draw the grid onto the given surface."""

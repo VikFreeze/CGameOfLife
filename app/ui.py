@@ -1,6 +1,6 @@
 # app/ui.py
 import pygame
-from .config import *
+from config import *
 from typing import Callable, List
 
 class Button:

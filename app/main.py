@@ -1,11 +1,11 @@
 # app/main.py
 import sys
 import pygame
-from .config import *
-from .grid import Grid
-from .renderer import render_grid
-from .ui import Button, Panel
-from .patterns import GLIDER, BLINKER, PULSAR
+from config import *
+from grid import Grid
+from renderer import render_grid
+from ui import Button, Panel
+from patterns import GLIDER, BLINKER, PULSAR
 
 def main():
     pygame.init()
