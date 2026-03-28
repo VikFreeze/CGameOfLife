@@ -5,6 +5,7 @@ description = "Conway’s Game of Life – fullscreen graphical demo"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "numba>=0.64.0",
     "pygame>=2.6.1",      # adjust to the latest stable release
 ]
 

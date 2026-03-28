@@ -25,18 +25,37 @@ class Button:
                 self.callback()
 
 class Panel:
-    """Bottom panel that holds a list of buttons."""
-    def __init__(self, surface: pygame.Surface, buttons: List[Button]):
-        self.surface = surface
-        self.buttons = buttons
-        self.rect = pygame.Rect(0, WINDOW_HEIGHT - PANEL_HEIGHT,
-                                WINDOW_WIDTH, PANEL_HEIGHT)
+    def __init__(self, surface: pygame.Surface, buttons, panel_height: int = 50):
+        self.surface      = surface            # the screen surface
+        self.buttons      = buttons
+        self.panel_height = panel_height
 
-    def draw(self, font: pygame.font.Font):
-        pygame.draw.rect(self.surface, (50, 50, 50), self.rect)
-        for btn in self.buttons:
-            btn.draw(self.surface, font)
+        # remember the *relative* rectangles of the buttons
+        # (the rectangles that were passed to the constructor)
+        self.base_rects = [b.rect.copy() for b in buttons]
 
-    def handle_event(self, event: pygame.event.Event):
-        for btn in self.buttons:
-            btn.handle_event(event)
+        # the panel rect will be rebuilt each time we draw
+        self.rect = pygame.Rect(0, 0, surface.get_width(), panel_height)
+
+    def update_rects(self) -> None:
+        """Re‑compute the panel’s absolute rectangle and
+        update every button’s absolute rectangle."""
+        # place the panel at the bottom of the current surface
+        self.rect.x = 0
+        self.rect.y = self.surface.get_height() - self.panel_height
+
+        # offset each button relative to the panel’s top‑left corner
+        for i, button in enumerate(self.buttons):
+            button.rect = self.base_rects[i].move(self.rect.topleft)
+
+    def draw(self, font: pygame.font.Font) -> None:
+        """Draw the panel background and all its buttons."""
+        self.update_rects()                         # <-- update positions
+        pygame.draw.rect(self.surface, PANEL_BG_COLOR, self.rect)
+
+        for button in self.buttons:
+            button.draw(self.surface, font)
+
+    def handle_event(self, event: pygame.event.Event) -> None:
+        for button in self.buttons:
+            button.handle_event(event)
