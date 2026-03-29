@@ -3,7 +3,10 @@ import sys
 import pygame
 from config import *
 from grid import Grid
-from renderer import render_grid
+from viewport import Viewport
+from state import AppState
+from input_handler import handle_events
+from renderer import draw          # ← updated import
 from ui import Button, Panel
 from patterns import GLIDER, BLINKER, PULSAR
 
@@ -15,92 +18,48 @@ def main():
 
     # ---------- grid + view state ----------
     grid = Grid(WINDOW_WIDTH, WINDOW_HEIGHT - PANEL_HEIGHT)
-
-    running     = False
-    cell_size   = DEFAULT_CELL_SIZE
-    offset_x    = 0
-    offset_y    = 0
-
-    # ---------- helper: keep view inside grid ----------
-    def clamp_offset():
-        nonlocal offset_x, offset_y
-        max_x = 0
-        min_x = WINDOW_WIDTH - grid.width * cell_size
-        max_y = 0
-        min_y = WINDOW_HEIGHT - grid.height * cell_size
-
-        if min_x > max_x:  # grid smaller than the window
-            min_x = max_x
-        if min_y > max_y:
-            min_y = max_y
-
-        offset_x = max(min(offset_x, max_x), min_x)
-        offset_y = max(min(offset_y, max_y), min_y)
-
-    # ---------- helper: zoom ----------
-    def apply_zoom(delta: int):
-        """Zoom in/out centred on the screen centre (used by keys)."""
-        nonlocal cell_size, offset_x, offset_y
-        new_size = cell_size + delta
-        if new_size < MIN_CELL_SIZE or new_size > MAX_CELL_SIZE:
-            return
-
-        # centre *in grid coordinates* before the zoom
-        centre_grid_x = (WINDOW_WIDTH / 2 - offset_x) / cell_size
-        centre_grid_y = (WINDOW_HEIGHT / 2 - offset_y) / cell_size
-
-        cell_size = new_size
-
-        # reposition offset so that the same grid point stays in the centre
-        offset_x = int(WINDOW_WIDTH / 2 - centre_grid_x * cell_size)
-        offset_y = int(WINDOW_HEIGHT / 2 - centre_grid_y * cell_size)
-
-        clamp_offset()
-
-    def apply_zoom_at(delta: int, pos: tuple):
-        """Zoom centred on *mouse* position (used by wheel)."""
-        nonlocal cell_size, offset_x, offset_y
-
-        # grid coordinate of the mouse before the zoom
-        mx, my = pos
-        mouse_grid_x = (mx - offset_x) / cell_size
-        mouse_grid_y = (my - offset_y) / cell_size
-
-        new_size = cell_size + delta
-        if new_size < MIN_CELL_SIZE or new_size > MAX_CELL_SIZE:
-            return
-
-        cell_size = new_size
-
-        # new offset so the same grid point stays under the cursor
-        offset_x = int(mx - mouse_grid_x * cell_size)
-        offset_y = int(my - mouse_grid_y * cell_size)
-
-        clamp_offset()
+    viewport = Viewport(
+        cell_size=DEFAULT_CELL_SIZE,
+        offset_x=0,
+        offset_y=0,
+        grid_width=grid.width,
+        grid_height=grid.height,
+        window_width=WINDOW_WIDTH,
+        window_height=WINDOW_HEIGHT
+    )
+    state = AppState(grid=grid, viewport=viewport,
+                     window_height=WINDOW_HEIGHT, panel_height=PANEL_HEIGHT)
 
     # ---------- UI ----------
     font = pygame.font.SysFont(FONT_NAME, 18)
 
     def toggle_run():
-        nonlocal running
-        running = not running
-        toggle_btn.text = "Pause" if running else "Start"
+        state.toggle_run()
+        toggle_btn.text = "Pause" if state.running else "Start"
 
     def reset():
-        nonlocal running, offset_x, offset_y
-        running = False
+        state.reset()
         toggle_btn.text = "Start"
-        grid.reset()
-        offset_x = offset_y = 0      # reset view
 
-    def set_glider():   grid.reset(GLIDER)
-    def set_blinker():  grid.reset(BLINKER)
-    def set_pulsar():   grid.reset(PULSAR)
-    def zoom_in():      apply_zoom(+1)
-    def zoom_out():     apply_zoom(-1)
+    def set_glider():
+        state.grid.reset(GLIDER.cells.astype(int).tolist())
+        state.viewport.offset_x = state.viewport.offset_y = 0
+
+    def set_blinker():
+        state.grid.reset(BLINKER.cells.astype(int).tolist())
+        state.viewport.offset_x = state.viewport.offset_y = 0
+
+    def set_pulsar():
+        state.grid.reset(PULSAR.cells.astype(int).tolist())
+        state.viewport.offset_x = state.viewport.offset_y = 0
+
+    def zoom_in():
+        viewport.apply_zoom(+1)
+
+    def zoom_out():
+        viewport.apply_zoom(-1)
 
     toggle_btn = Button(pygame.Rect(10, 10, 80, BUTTON_HEIGHT), "Start", toggle_run)
-
     buttons = [
         toggle_btn,
         Button(pygame.Rect(100, 10, 80, BUTTON_HEIGHT), "Reset", reset),
@@ -110,84 +69,20 @@ def main():
         Button(pygame.Rect(460, 10, 80, BUTTON_HEIGHT), "Zoom+", zoom_in),
         Button(pygame.Rect(550, 10, 80, BUTTON_HEIGHT), "Zoom-", zoom_out),
     ]
-
     panel = Panel(screen, buttons, panel_height=PANEL_HEIGHT)
-
-    # ---------- mouse editing helper ----------
-    dragging = False
-    drag_button = 0
-
-    def _set_cell_from_pos(pos, button):
-        mx, my = pos
-        if my < WINDOW_HEIGHT - PANEL_HEIGHT:   # inside grid area
-            cx, cy = (mx - offset_x) // cell_size, (my - offset_y) // cell_size
-            if 0 <= cx < grid.width and 0 <= cy < grid.height:
-                grid.cells[cy, cx] = 1 if button == 1 else 0
-
-    # ---------- continuous arrow‑key panning ----------
-    pressed_keys = set()          # holds pygame key constants while held
 
     # ---------- main loop ----------
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+        events = pygame.event.get()
+        handle_events(events, state, panel)
 
-            # 1️⃣  mouse editing
-            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION):
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button in (1, 3):
-                        dragging = True
-                        drag_button = event.button
-                        _set_cell_from_pos(event.pos, event.button)
-                elif event.type == pygame.MOUSEMOTION and dragging:
-                    _set_cell_from_pos(event.pos, drag_button)
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    dragging = False
+        pan_step = viewport.cell_size * 5
+        state.update_pan(pan_step)
 
-            # 2️⃣  key handling – store pressed keys
-            if event.type == pygame.KEYDOWN:
-                pressed_keys.add(event.key)
-                # space toggles simulation
-                if event.key == pygame.K_SPACE:
-                    toggle_run()
-            elif event.type == pygame.KEYUP:
-                pressed_keys.discard(event.key)
+        if state.running:
+            state.grid.tick()
 
-            # 3️⃣  mouse wheel zoom – focus on cursor
-            if event.type == pygame.MOUSEWHEEL:
-                mx, my = pygame.mouse.get_pos()
-                apply_zoom_at(event.y, (mx, my))
-
-            # 4️⃣  panel (buttons)
-            panel.handle_event(event)
-
-        # ---------- continuous arrow‑key panning ----------
-        pan_step = cell_size * 5          # tweak for speed
-        if pygame.K_LEFT  in pressed_keys:
-            offset_x += pan_step
-            clamp_offset()
-        if pygame.K_RIGHT in pressed_keys:
-            offset_x -= pan_step
-            clamp_offset()
-        if pygame.K_UP    in pressed_keys:
-            offset_y += pan_step
-            clamp_offset()
-        if pygame.K_DOWN  in pressed_keys:
-            offset_y -= pan_step
-            clamp_offset()
-
-        # ---------- simulation step ----------
-        if running:
-            grid.tick()
-
-        # ---------- draw ----------
-        screen.fill(BG_COLOR)
-        render_grid(screen, grid, cell_size, (offset_x, offset_y))
-        panel.draw(font)
-
-        pygame.display.flip()
+        draw(screen, state, panel, font)
         clock.tick(FPS)
 
 if __name__ == "__main__":

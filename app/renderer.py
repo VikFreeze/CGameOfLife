@@ -9,7 +9,6 @@ def render_grid(surface: pygame.Surface, grid, cell_size: int, offset: tuple):
     alive = CELL_ALIVE_COLOR
 
     # Very small optimisation: skip cells that are completely off screen
-    # (good enough for a 1920×1080 grid even at cell_size = 1)
     for y, row in enumerate(grid.cells):
         for x, alive_flag in enumerate(row):
             if alive_flag:
@@ -20,3 +19,16 @@ def render_grid(surface: pygame.Surface, grid, cell_size: int, offset: tuple):
                     cell_size
                 )
                 surface.fill(alive, rect)
+
+
+def draw(screen, state, panel, font):
+    """Wrapper that draws the entire frame (grid + UI) and flips the display."""
+    screen.fill(BG_COLOR)
+    render_grid(
+        screen,
+        state.grid,
+        state.viewport.cell_size,
+        (state.viewport.offset_x, state.viewport.offset_y)
+    )
+    panel.draw(font)
+    pygame.display.flip()
