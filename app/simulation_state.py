@@ -48,6 +48,11 @@ class SimulationState(BaseState):
         self.ctx.viewport.apply_zoom(-1)
 
     def open_gallery(self):
+        # Stop any accidental dragging that might have been started
+        self.dragging = False
+        self.drag_button = 0
+
+        # Switch to the modal gallery
         self.ctx.state_machine.switch(GalleryState(self.ctx))
 
     # ------------------------------------------------------------------

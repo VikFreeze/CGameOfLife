@@ -76,6 +76,11 @@ class GalleryState(BaseState):
     # ------------------------------------------------------------------
     def close(self):
         self.ctx.simulation_state.running = self.was_running
+        
+        # Ensure we don't resume with a dangling drag flag
+        self.ctx.simulation_state.dragging = False
+        self.ctx.simulation_state.drag_button = 0
+
         self.ctx.state_machine.switch(self.ctx.simulation_state)
 
     # ------------------------------------------------------------------
@@ -86,6 +91,10 @@ class GalleryState(BaseState):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self.close()
+                continue
 
             # Let the gallery panel handle its own UI events
             self.panel.handle_event(event)
