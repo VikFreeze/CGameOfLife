@@ -21,41 +21,30 @@ class Button:
         if event.type == pygame.MOUSEMOTION:
             self.hover = self.rect.collidepoint(event.pos)
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if self.hover and event.button == 1:   # left click
+            if self.hover and event.button == 1:
                 self.callback()
 
 class Panel:
-    def __init__(self, surface: pygame.Surface, buttons, panel_height: int = 50):
-        self.surface      = surface            # the screen surface
+    def __init__(self, surface: pygame.Surface, buttons: List[Button], panel_height: int = 50):
+        self.surface      = surface
         self.buttons      = buttons
         self.panel_height = panel_height
-
-        # remember the *relative* rectangles of the buttons
-        # (the rectangles that were passed to the constructor)
+        # Remember the base rectangles to rebuild the panel each draw
         self.base_rects = [b.rect.copy() for b in buttons]
-
-        # the panel rect will be rebuilt each time we draw
         self.rect = pygame.Rect(0, 0, surface.get_width(), panel_height)
 
-    def update_rects(self) -> None:
-        """Re‑compute the panel’s absolute rectangle and
-        update every button’s absolute rectangle."""
-        # place the panel at the bottom of the current surface
+    def update_rects(self):
         self.rect.x = 0
         self.rect.y = self.surface.get_height() - self.panel_height
-
-        # offset each button relative to the panel’s top‑left corner
         for i, button in enumerate(self.buttons):
             button.rect = self.base_rects[i].move(self.rect.topleft)
 
-    def draw(self, font: pygame.font.Font) -> None:
-        """Draw the panel background and all its buttons."""
-        self.update_rects()                         # <-- update positions
+    def draw(self, font: pygame.font.Font):
+        self.update_rects()
         pygame.draw.rect(self.surface, PANEL_BG_COLOR, self.rect)
-
         for button in self.buttons:
             button.draw(self.surface, font)
 
-    def handle_event(self, event: pygame.event.Event) -> None:
+    def handle_event(self, event: pygame.event.Event):
         for button in self.buttons:
             button.handle_event(event)
