@@ -33,19 +33,6 @@ class Grid:
         """Compute the next generation – JIT‑accelerated."""
         self.cells = _tick_numba(self.cells)
 
-    # def _alive_neighbors(self, x: int, y: int) -> int:
-    #     """Count alive cells in the 8 neighbouring positions (wrap‑around)."""
-    #     total = 0
-    #     for dy in (-1, 0, 1):
-    #         for dx in (-1, 0, 1):
-    #             if dx == 0 and dy == 0:
-    #                 continue
-    #             nx = (x + dx) % self.width
-    #             ny = (y + dy) % self.height
-    #             if self.cells[ny][nx]:
-    #                 total += 1
-    #     return total
-
 @njit(parallel=True)
 def _tick_numba(cells: np.ndarray) -> np.ndarray:
     h, w = cells.shape
