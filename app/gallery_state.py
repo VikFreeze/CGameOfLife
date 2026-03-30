@@ -14,7 +14,7 @@ class GalleryState(BaseState):
         ctx.simulation_state.running = False
 
         # Define the rectangle for the gallery window
-        gw, gh = 600, 800                 # width × height of the modal
+        gw, gh = 600, ctx.screen.get_height() - 100                 # width × height of the modal
         center_x = ctx.screen.get_width() // 2 - gw // 2
         center_y = ctx.screen.get_height() // 2 - gh // 2
         self.gallery_rect = pygame.Rect(center_x, center_y, gw, gh)
