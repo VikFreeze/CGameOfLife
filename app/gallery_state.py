@@ -1,67 +1,45 @@
 # app/gallery_state.py
 import pygame
-from ui import Button, Panel
-from renderer import render_grid
 from state_machine import BaseState
+from ui import Gallery
+from renderer import draw
 
 class GalleryState(BaseState):
-    """Modal overlay that shows the pattern gallery."""
+    """A modal overlay that shows the pattern gallery."""
 
     def __init__(self, ctx):
         super().__init__(ctx)
-
-        # Remember if the simulation was running
+        # Remember if the simulation was running so we can restore it
         self.was_running = ctx.simulation_state.running
         ctx.simulation_state.running = False
 
-        # Build a full‑screen panel that will hold the pattern buttons
-        self.panel = Panel(
+        # Define the rectangle for the gallery window
+        gw, gh = 600, 800                 # width × height of the modal
+        center_x = ctx.screen.get_width() // 2 - gw // 2
+        center_y = ctx.screen.get_height() // 2 - gh // 2
+        self.gallery_rect = pygame.Rect(center_x, center_y, gw, gh)
+
+        # Create the Gallery widget
+        self.gallery = Gallery(
             ctx.screen,
-            self._create_pattern_buttons(),
-            panel_height=ctx.screen.get_height()   # full height
+            self.gallery_rect,
+            ctx.patterns,
+            on_select=self.place_pattern
         )
-        # Override the panel’s height so `Panel.update_rects()` puts it at (0,0)
-        self.panel.panel_height = ctx.screen.get_height()
+        # allow the widget to call back when close button pressed
+        self.gallery.on_close = self.close
 
-    # ------------------------------------------------------------------
-    # Helper – build pattern buttons
-    # ------------------------------------------------------------------
-    def _create_pattern_buttons(self):
-        buttons = []
-        btn_w, btn_h = 120, 80
-        margin = 10
-
-        for idx, pat in enumerate(self.ctx.patterns):
-            x = margin + (idx % 4) * (btn_w + margin)
-            y = margin + (idx // 4) * (btn_h + margin)
-
-            # capture the pattern in the callback
-            btn = Button(pygame.Rect(x, y, btn_w, btn_h), pat.title,
-                         lambda p=pat: self.place_pattern(p))
-            buttons.append(btn)
-
-        # Close button
-        close_btn = Button(
-            pygame.Rect(10, self.ctx.screen.get_height() - 60, 80, 40),
-            "Close", self.close)
-        buttons.append(close_btn)
-
-        return buttons
-
-    # ------------------------------------------------------------------
-    # Pattern placement
-    # ------------------------------------------------------------------
+    # --------------------------------------------------------------------- #
+    # Pattern placement callback
+    # --------------------------------------------------------------------- #
     def place_pattern(self, pattern):
-        """Place the selected pattern centred in the viewport."""
         cells = pattern.cells
         ph, pw = cells.shape
-        cs = self.ctx.viewport.cell_size
-
-        # Position in *grid* coordinates
-        cx = ((self.ctx.viewport.window_width // 2 - pw * cs // 2
-               - self.ctx.viewport.offset_x) // cs)
-        cy = ((self.ctx.viewport.window_height // 2 - ph * cs // 2
-               - self.ctx.viewport.offset_y) // cs)
+        # compute target top‑left corner (in cell coordinates)
+        cx = (self.ctx.viewport.window_width // 2 - pw // 2 -
+              self.ctx.viewport.offset_x // self.ctx.viewport.cell_size)
+        cy = (self.ctx.viewport.window_height // 2 - ph // 2 -
+              self.ctx.viewport.offset_y // self.ctx.viewport.cell_size)
 
         for y in range(ph):
             for x in range(pw):
@@ -71,56 +49,42 @@ class GalleryState(BaseState):
                     if 0 <= gx < self.ctx.grid.width and 0 <= gy < self.ctx.grid.height:
                         self.ctx.grid.cells[gy, gx] = 1
 
-    # ------------------------------------------------------------------
-    # Close gallery
-    # ------------------------------------------------------------------
+    # --------------------------------------------------------------------- #
+    # UI callbacks
+    # --------------------------------------------------------------------- #
     def close(self):
+        # restore simulation state
         self.ctx.simulation_state.running = self.was_running
-        
-        # Ensure we don't resume with a dangling drag flag
-        self.ctx.simulation_state.dragging = False
-        self.ctx.simulation_state.drag_button = 0
-
         self.ctx.state_machine.switch(self.ctx.simulation_state)
 
-    # ------------------------------------------------------------------
-    # Event handling
-    # ------------------------------------------------------------------
+    # --------------------------------------------------------------------- #
+    # event handling – delegate everything to the widget
+    # --------------------------------------------------------------------- #
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.close()
-                continue
+            self.gallery.handle_event(event)
 
-            # Let the gallery panel handle its own UI events
-            self.panel.handle_event(event)
-
-            # All other events are deliberately ignored
-
-    # ------------------------------------------------------------------
-    # Update – nothing to do, simulation stays paused
-    # ------------------------------------------------------------------
+    # --------------------------------------------------------------------- #
+    # update – nothing to do (simulation stays paused)
+    # --------------------------------------------------------------------- #
     def update(self):
         pass
 
-    # ------------------------------------------------------------------
-    # Rendering – dark overlay + grid + gallery panel
-    # ------------------------------------------------------------------
+    # --------------------------------------------------------------------- #
+    # rendering – draw normal grid + dark overlay + gallery window
+    # --------------------------------------------------------------------- #
     def render(self):
-        # Dark translucent overlay
+        # 1️⃣  draw darkened background
         overlay = pygame.Surface(self.ctx.screen.get_size(), flags=pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 128))
         self.ctx.screen.blit(overlay, (0, 0))
 
-        # Grid underneath
-        render_grid(self.ctx.screen, self.ctx.grid, self.ctx.viewport.cell_size,
-                    (self.ctx.viewport.offset_x, self.ctx.viewport.offset_y))
+        # 2️⃣  draw the grid underneath
+        draw(self.ctx.screen, self.ctx, None, self.ctx.font)
 
-        # Gallery panel
-        self.panel.draw(self.ctx.font)
-
+        # 3️⃣  draw the gallery window on top
+        self.gallery.draw(self.ctx.font)
         pygame.display.flip()

@@ -56,4 +56,4 @@ PULSAR = Pattern(
 
 # --- Add more patterns here – they’ll appear automatically in the gallery. #
 # --------------------------------------------------------------------------- #
-ALL_PATTERNS = [GLIDER, BLINKER, PULSAR]
+ALL_PATTERNS = [GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR]
