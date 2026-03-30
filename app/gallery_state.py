@@ -61,11 +61,14 @@ class GalleryState(BaseState):
     # event handling – delegate everything to the widget
     # --------------------------------------------------------------------- #
     def handle_events(self, events):
+        """Forward every event to the gallery widget – plus ESC → close."""
         for event in events:
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            # ← already handled by the gallery widget
             self.gallery.handle_event(event)
+
+            # ESC → close the gallery (no other state will be affected)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self.close()
 
     # --------------------------------------------------------------------- #
     # update – nothing to do (simulation stays paused)
