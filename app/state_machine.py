@@ -2,13 +2,10 @@
 class BaseState:
     def __init__(self, ctx: "AppContext"):
         self.ctx = ctx
-
     def handle_events(self, events):
         raise NotImplementedError
-
     def update(self):
         raise NotImplementedError
-
     def render(self):
         raise NotImplementedError
 

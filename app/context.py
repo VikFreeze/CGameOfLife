@@ -10,8 +10,5 @@ class AppContext:
         self.screen       = screen
         self.grid         = grid
         self.viewport     = viewport
-        self.panel_height = 60
         self.font         = pygame.font.SysFont("Arial", 18)
-
-        # Pattern list for the gallery
         self.patterns = ALL_PATTERNS

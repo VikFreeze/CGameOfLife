@@ -1,7 +1,6 @@
 # app/renderer.py
 import pygame
 from config import *
-
 def render_grid(surface: pygame.Surface, grid, cell_size: int, offset: tuple):
     """Draw the grid, taking into account the current pan/zoom."""
     offset_x, offset_y = offset
@@ -19,6 +18,6 @@ def draw(screen, ctx, panel, font):
     screen.fill(BG_COLOR)
     render_grid(screen, ctx.grid, ctx.viewport.cell_size,
                 (ctx.viewport.offset_x, ctx.viewport.offset_y))
-    if panel:                 # <-- guard against None
+    if panel:                 # guard against None
         panel.draw(font)
     pygame.display.flip()

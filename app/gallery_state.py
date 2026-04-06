@@ -3,50 +3,36 @@ import pygame
 from state_machine import BaseState
 from gallery import Gallery
 from renderer import draw
-from patterns import ALL_PATTERNS
-
 
 class GalleryState(BaseState):
-    """A modal overlay that shows the pattern gallery."""
+    """Modal overlay that shows the pattern gallery."""
     def __init__(self, ctx):
         super().__init__(ctx)
-        # Remember if the simulation was running so we can restore it
         self.was_running = ctx.simulation_state.running
         ctx.simulation_state.running = False
 
-        # Define the rectangle for the gallery window
-        gw, gh = 600, ctx.screen.get_height() - 100  # width × height of the modal
+        # gallery window
+        gw, gh = 600, ctx.screen.get_height() - 100
         center_x = ctx.screen.get_width() // 2 - gw // 2
         center_y = ctx.screen.get_height() // 2 - gh // 2
         self.gallery_rect = pygame.Rect(center_x, center_y, gw, gh)
 
-        # Create the Gallery widget
         self.gallery = Gallery(
             ctx.screen,
             self.gallery_rect,
-            on_select=self.place_pattern,  # callback when a pattern is chosen
+            on_select=self.place_pattern,
         )
-        # allow the widget to call back when close button pressed
-        self.gallery.on_close = self.close  # <-- new attribute
+        # Close callback is handled by ESC inside Gallery
 
-    # -------------------------------------------------------------------- #
-    #  Pattern placement callback
-    # -------------------------------------------------------------------- #
-    def place_pattern(self, pattern: "Pattern", orientation: int, flip_x: bool, flip_y: bool):
-        """Convert the pattern (after orientation / flips) into the grid."""
+    # ---------- Pattern placement ----------
+    def place_pattern(self, pattern, orientation, flip_x, flip_y):
         cells = pattern.cells.astype(int)
-
-        # flips
         if flip_x:
             cells = np.flip(cells, axis=1)
         if flip_y:
             cells = np.flip(cells, axis=0)
-
-        # rotations
         cells = np.rot90(cells, k=orientation)
-
         ph, pw = cells.shape
-        # compute target top‑left corner (in cell coordinates)
         cx = (
             self.ctx.viewport.window_width // 2
             - pw // 2
@@ -65,41 +51,27 @@ class GalleryState(BaseState):
                     if 0 <= gx < self.ctx.grid.width and 0 <= gy < self.ctx.grid.height:
                         self.ctx.grid.cells[gy, gx] = 1
 
-    # -------------------------------------------------------------------- #
-    #  UI callbacks
-    # -------------------------------------------------------------------- #
+    # ---------- State transition ----------
     def close(self):
-        # restore simulation state
         self.ctx.simulation_state.running = self.was_running
         self.ctx.state_machine.switch(self.ctx.simulation_state)
 
-    # -------------------------------------------------------------------- #
-    #  event handling – delegate everything to the widget
-    # -------------------------------------------------------------------- #
+    # ---------- Event handling ----------
     def handle_events(self, events):
         for event in events:
-            # ← already handled by the gallery widget
             self.gallery.handle_event(event)
-            # ESC → close the gallery (no other state will be affected)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.close()
 
-    # -------------------------------------------------------------------- #
-    #  update – nothing to do (simulation stays paused)
-    # -------------------------------------------------------------------- #
+    # ---------- Update ----------
     def update(self):
         pass
 
-    # -------------------------------------------------------------------- #
-    #  rendering – draw normal grid + dark overlay + gallery window
-    # -------------------------------------------------------------------- #
+    # ---------- Rendering ----------
     def render(self):
-        # 1️⃣  draw darkened background
         overlay = pygame.Surface(self.ctx.screen.get_size(), flags=pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 128))
         self.ctx.screen.blit(overlay, (0, 0))
-        # 2️⃣  draw the grid underneath
         draw(self.ctx.screen, self.ctx, None, self.ctx.font)
-        # 3️⃣  draw the gallery window on top
         self.gallery.draw(self.ctx.font)
         pygame.display.flip()
