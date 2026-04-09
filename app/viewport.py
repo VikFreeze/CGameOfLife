@@ -26,17 +26,17 @@ class Viewport:
         self.offset_x = max(min(self.offset_x, max_x), min_x)
         self.offset_y = max(min(self.offset_y, max_y), min_y)
 
-    def apply_zoom(self, delta: int):
-        """Zoom in/out centred on the screen centre (used by keys)."""
-        new_size = self.cell_size + delta
-        if new_size < MIN_CELL_SIZE or new_size > MAX_CELL_SIZE:
-            return
-        centre_grid_x = (self.window_width / 2 - self.offset_x) / self.cell_size
-        centre_grid_y = (self.window_height / 2 - self.offset_y) / self.cell_size
-        self.cell_size = new_size
-        self.offset_x = int(self.window_width / 2 - centre_grid_x * self.cell_size)
-        self.offset_y = int(self.window_height / 2 - centre_grid_y * self.cell_size)
-        self.clamp_offset()
+    # def apply_zoom(self, delta: int):
+        # """Zoom in/out centred on the screen centre (used by keys)."""
+        # new_size = self.cell_size + delta
+        # if new_size < MIN_CELL_SIZE or new_size > MAX_CELL_SIZE:
+        #     return
+        # centre_grid_x = (self.window_width / 2 - self.offset_x) / self.cell_size
+        # centre_grid_y = (self.window_height / 2 - self.offset_y) / self.cell_size
+        # self.cell_size = new_size
+        # self.offset_x = int(self.window_width / 2 - centre_grid_x * self.cell_size)
+        # self.offset_y = int(self.window_height / 2 - centre_grid_y * self.cell_size)
+        # self.clamp_offset()
 
     def apply_zoom_at(self, delta: int, pos: tuple):
         """Zoom centred on the mouse position (used by wheel)."""
@@ -49,4 +49,4 @@ class Viewport:
         self.cell_size = new_size
         self.offset_x = int(mx - mouse_grid_x * self.cell_size)
         self.offset_y = int(my - mouse_grid_y * self.cell_size)
-        self.clamp_offset()
+        # self.clamp_offset()

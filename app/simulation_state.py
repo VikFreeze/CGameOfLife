@@ -85,20 +85,20 @@ class SimulationState:
     def update(self):
         pan_step = self.ctx.viewport.cell_size * 5
         if pygame.K_LEFT in self.pressed_keys:
-            self.ctx.viewport.offset_x += pan_step
-            self.ctx.viewport.clamp_offset()
+            self.ctx.viewport.offset_x = (self.ctx.viewport.offset_x - pan_step) % (self.ctx.grid.width * self.ctx.viewport.cell_size)
+            # self.ctx.viewport.clamp_offset()
         if pygame.K_RIGHT in self.pressed_keys:
-            self.ctx.viewport.offset_x -= pan_step
-            self.ctx.viewport.clamp_offset()
+            self.ctx.viewport.offset_x = (self.ctx.viewport.offset_x + pan_step) % (self.ctx.grid.width * self.ctx.viewport.cell_size)
+            # self.ctx.viewport.clamp_offset()
         if pygame.K_UP in self.pressed_keys:
-            self.ctx.viewport.offset_y += pan_step
-            self.ctx.viewport.clamp_offset()
+            self.ctx.viewport.offset_y = (self.ctx.viewport.offset_y - pan_step) % (self.ctx.grid.height * self.ctx.viewport.cell_size)
+            # self.ctx.viewport.clamp_offset()
         if pygame.K_DOWN in self.pressed_keys:
-            self.ctx.viewport.offset_y -= pan_step
-            self.ctx.viewport.clamp_offset()
+            self.ctx.viewport.offset_y = (self.ctx.viewport.offset_y + pan_step) % (self.ctx.grid.height * self.ctx.viewport.cell_size)
+            # self.ctx.viewport.clamp_offset()
         if self.running:
             self.ctx.grid.tick()
 
     # ---------- Rendering ----------
     def render(self):
-        draw(self.ctx.screen, self.ctx, None, self.ctx.font)
+        draw(self.ctx.screen, self.ctx)
