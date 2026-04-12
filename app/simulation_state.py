@@ -61,7 +61,7 @@ class SimulationState:
             # Mouse wheel zoom
             elif event.type == pygame.MOUSEWHEEL:
                 mx, my = pygame.mouse.get_pos()
-                self.ctx.viewport.apply_zoom_at(event.y, (mx, my))
+                self.ctx.viewport.apply_zoom_at(self.ctx, event.y, (mx, my))
 
     def _handle_mouse(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -69,17 +69,27 @@ class SimulationState:
                 self.dragging = True
                 self.drag_button = event.button
                 self._set_cell_from_pos(event.pos, event.button)
+            elif event.button == 2:
+                self.dragging = True
+                self.drag_button = 2
+                self.drag_start = event.pos
         elif event.type == pygame.MOUSEMOTION and self.dragging:
-            self._set_cell_from_pos(event.pos, self.drag_button)
+            if self.drag_button in (1, 3):
+                self._set_cell_from_pos(event.pos, self.drag_button)
+            elif self.drag_button == 2:
+                dx, dy = event.rel
+                self.ctx.viewport.offset_x = (self.ctx.viewport.offset_x - dx) % (self.ctx.grid.width * self.ctx.viewport.cell_size)
+                self.ctx.viewport.offset_y = (self.ctx.viewport.offset_y - dy) % (self.ctx.grid.height * self.ctx.viewport.cell_size)
         elif event.type == pygame.MOUSEBUTTONUP:
             self.dragging = False
 
     def _set_cell_from_pos(self, pos, button):
         mx, my = pos
-        cx = (mx - self.ctx.viewport.offset_x) // self.ctx.viewport.cell_size
-        cy = (my - self.ctx.viewport.offset_y) // self.ctx.viewport.cell_size
-        if 0 <= cx < self.ctx.grid.width and 0 <= cy < self.ctx.grid.height:
-            self.ctx.grid.cells[cy, cx] = 1 if button == 1 else 0
+        # Translate pixel to grid index with wrapping
+        cx = ((mx + self.ctx.viewport.offset_x) // self.ctx.viewport.cell_size) % self.ctx.grid.width
+        cy = ((my + self.ctx.viewport.offset_y) // self.ctx.viewport.cell_size) % self.ctx.grid.height
+
+        self.ctx.grid.cells[cy, cx] = 1 if button == 1 else 0
 
     # ---------- Simulation logic ----------
     def update(self):
