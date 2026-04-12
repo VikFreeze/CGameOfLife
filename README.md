@@ -1,7 +1,8 @@
 
 # CGameOfLife
 
-Conway’s Game of Life – a full‑screen, zoomable, wrap‑around simulation written in Python.  
+Conway’s Game of Life - zero players, one grid, four rules, infinit possibilities.  
+This is a full‑screen, zoomable, wrap‑around, interactable simulation written in Python for experimentation with patterns.
 It uses **Pygame** for graphics and **uv** for packaging and dependency management.
 
 ---
@@ -21,10 +22,14 @@ It uses **Pygame** for graphics and **uv** for packaging and dependency manageme
 
 | Feature | Description |
 |---------|-------------|
-| **Fullscreen window** | Occupies the entire screen with the same resolution as the display. |
-| **Wrap‑around grid** | Off‑screen neighbors wrap to the opposite edge (toroidal topology). |
-| **Zoom** | 1 cell can be 1×1, 2×2, 3×3 … pixels. Press *Zoom+* / *Zoom‑* to adjust. |
-| **Control panel** | Bottom panel with Start, Pause, Reset, preset patterns (Glider, Blinker, Pulsar), Zoom controls. |
+| **Adjust values in config.py** | Adjust the values in config.py, mainly the window size.<br />Idealy you should set it to the same as your monitors resolution for<br />fullscreen mode but, larger window sizes will also lead to slower performance |
+| **Fullscreen window** | Drag the window to the desired monitor and toggle fullscreen with F11 |
+| **Decide who lives** | Click individual cells to set them to alive state, or click and drag to leave flurishing life in your wake. |
+| **And who does not** | Right-click individual cells to set them to dead state, or right-click and drag to leave a baren wasteland in your wake. |
+| **Play God** | Stop the simulation and clear the grid with R |
+| **Run simulation** | Toggle the simulation on and off with space bar |
+| **Zoom & Pan** | See something interesting? Place the mouse over it and zoom in with the scroll wheel. You can also pan with the arrow keys or by holding the middle mouse button |
+| **Toroidal grid** | The grid is infinit so we ~~faked~~ acchieved this with a bit of modulo arithemetic |
 
 ---
 
@@ -70,21 +75,16 @@ You’ll see a black window with the grid and a bottom control panel.
 
 | Button | Action |
 |--------|--------|
-| **Start** | Run the simulation. |
-| **Pause** | Pause the simulation. |
-| **Reset** | Stop and clear the grid. |
-| **Glider / Blinker / Pulsar** | Load a predefined pattern. |
-| **Zoom+ / Zoom‑** | Increase / decrease the pixel size of a cell. |
-
-*Keyboard shortcuts* can be added later – currently only mouse interaction is supported.
-
----
-
-## 🔍 Zoom & Wrap‑around
-
-*Wrap‑around* is handled entirely in the `Grid` logic using modulo arithmetic (`%`).  
-*Zoom* only changes the `cell_size` used when drawing; the logical grid size stays constant.  
+| **F11** | Toggle fullscreen |
+| **Click/drag** | Revive cells |
+| **Right-click/drag** | Euthanise cells |
+| **R** | Reset |
+| **Space** | Toggle simulation |
+| **Mouse Wheel** | Zoom |
+| **Middle Mouse/Arrow Keys** | Pan |
+| **Q** | Quit |
 
 ---
+
 
 
