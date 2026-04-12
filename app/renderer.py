@@ -62,8 +62,31 @@ def render_grid(surface: pygame.Surface, grid, cell_size: int, offset: tuple):
     # ------------------------------------------------------------------
     surface.blit(wrap_surf, (0, 0), viewport_rect)
 
-def draw(screen, ctx):
+def draw_state_indicator(ctx, simulation_state):
+    font = pygame.font.SysFont(None, 36)
+    text = "RUNNING" if simulation_state else "PAUSED"
+    color = (255, 255, 255)   # white
+    surface = font.render(text, True, color)
+
+    # Center at top of viewport
+    x = ctx.viewport.window_width // 2 - surface.get_width() // 2
+    y = 10   # 10 pixels from the top
+    text_rect = surface.get_rect(topleft=(x, y))
+
+    padding_w, padding_h = 20, 10
+    poly = [
+        (text_rect.left - padding_w, text_rect.top - padding_h),
+        (text_rect.right + padding_w, text_rect.top - padding_h),
+        (text_rect.right + padding_w - 15, text_rect.bottom + padding_h),
+        (text_rect.left - padding_w + 15, text_rect.bottom + padding_h)
+    ]
+
+    pygame.draw.polygon(ctx.screen, (0, 120, 255), poly)
+    ctx.screen.blit(surface, text_rect.topleft)
+
+def draw(ctx, simulation_state):
     """Wrapper that draws the entire frame and flips the display."""
-    screen.fill(BG_COLOR)
-    render_grid(screen, ctx.grid, ctx.viewport.cell_size, (ctx.viewport.offset_x, ctx.viewport.offset_y))
+    ctx.screen.fill(BG_COLOR)
+    render_grid(ctx.screen, ctx.grid, ctx.viewport.cell_size, (ctx.viewport.offset_x, ctx.viewport.offset_y))
+    draw_state_indicator(ctx, simulation_state)
     pygame.display.flip()

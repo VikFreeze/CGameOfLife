@@ -51,6 +51,8 @@ def main():
                     # update viewport window size
                     viewport.window_width = screen.get_width()
                     viewport.window_height = screen.get_height()
+                if event.key == pygame.K_r:
+                    ctx.simulation_state.reset()
                 # Q → quit the program
                 if event.key == pygame.K_q:
                     pygame.quit()
