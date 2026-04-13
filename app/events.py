@@ -5,7 +5,7 @@ from context import AppState
 class InputHandler:
     def __init__(self, ctx):
         self.ctx = ctx
-        self.pressed_keys = set()
+        # self.pressed_keys = set()
         self.dragging = False
         self.drag_button = 0
 
@@ -41,7 +41,6 @@ class InputHandler:
             
             # Key events
             elif event.type == pygame.KEYDOWN:
-                self.pressed_keys.add(event.key)
                 # F11 → toggle fullscreen / windowed
                 if event.key == pygame.K_SPACE:
                     # Toggle Simulation State
@@ -62,23 +61,20 @@ class InputHandler:
                 if event.key == pygame.K_q:
                     pygame.quit()
                     return True
-                if event.key in (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN):
-                    self._handlePanning()
-            
-            elif event.type == pygame.KEYUP:
-                self.pressed_keys.discard(event.key)
-        return False
-    
-    def _handlePanning(self):
+        
+        # Continuous panning when holding the arrow keys
+        keys = pygame.key.get_pressed()
         pan_step = self.ctx.viewport.cell_size * 5
-        if pygame.K_LEFT in self.pressed_keys:
+        if keys[pygame.K_LEFT]:
             self.ctx.viewport.offset_x = (self.ctx.viewport.offset_x - pan_step) % (self.ctx.grid.width * self.ctx.viewport.cell_size)
-        if pygame.K_RIGHT in self.pressed_keys:
+        if keys[pygame.K_RIGHT]:
             self.ctx.viewport.offset_x = (self.ctx.viewport.offset_x + pan_step) % (self.ctx.grid.width * self.ctx.viewport.cell_size)
-        if pygame.K_UP in self.pressed_keys:
+        if keys[pygame.K_UP]:
             self.ctx.viewport.offset_y = (self.ctx.viewport.offset_y - pan_step) % (self.ctx.grid.height * self.ctx.viewport.cell_size)
-        if pygame.K_DOWN in self.pressed_keys:
+        if keys[pygame.K_DOWN]:
             self.ctx.viewport.offset_y = (self.ctx.viewport.offset_y + pan_step) % (self.ctx.grid.height * self.ctx.viewport.cell_size)
+
+        return False
     
     def _set_cell_from_pos(self, pos, button):
         mx, my = pos
