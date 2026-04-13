@@ -1,28 +1,9 @@
 # app/renderer.py
 import pygame
+from context import AppState
 from config import *
 
 def render_grid(surface: pygame.Surface, grid, cell_size: int, offset: tuple):
-    """
-    Draw the grid with wrap‑around using a single blit.
-
-    Parameters
-    ----------
-    surface : pygame.Surface
-        Destination surface (the screen).
-    grid : object
-        The simulation grid; must expose `cells`, `width`, `height`.
-    cell_size : int
-        Size of one cell in pixels.
-    offset : tuple[int, int]
-        Pan offset in pixels (offset_x, offset_y).
-    """
-    # ------------------------------------------------------------------
-    # 1. Create a cached surface that contains the entire grid once
-    #    – we only rebuild it if the grid changes.  For brevity we rebuild
-    #    every call here; in a real app keep a reference and update only
-    #    when `grid.cells` changes.
-    # ------------------------------------------------------------------
     grid_surf = pygame.Surface((grid.width * cell_size, grid.height * cell_size))
     grid_surf.fill(CELL_DEAD_COLOR)
 
@@ -62,9 +43,9 @@ def render_grid(surface: pygame.Surface, grid, cell_size: int, offset: tuple):
     # ------------------------------------------------------------------
     surface.blit(wrap_surf, (0, 0), viewport_rect)
 
-def draw_state_indicator(ctx, simulation_state):
+def draw_state_indicator(ctx):
     font = pygame.font.SysFont(None, 36)
-    text = "RUNNING" if simulation_state else "PAUSED"
+    text = "RUNNING" if ctx.state == AppState.RUNNING else "PAUSED"
     color = (255, 255, 255)   # white
     surface = font.render(text, True, color)
 
@@ -84,9 +65,9 @@ def draw_state_indicator(ctx, simulation_state):
     pygame.draw.polygon(ctx.screen, (0, 120, 255), poly)
     ctx.screen.blit(surface, text_rect.topleft)
 
-def draw(ctx, simulation_state):
-    """Wrapper that draws the entire frame and flips the display."""
-    ctx.screen.fill(BG_COLOR)
+def Draw(ctx):
+    # Wrapper that draws the entire frame and flips the display
+    ctx.screen.fill(CELL_DEAD_COLOR)
     render_grid(ctx.screen, ctx.grid, ctx.viewport.cell_size, (ctx.viewport.offset_x, ctx.viewport.offset_y))
-    draw_state_indicator(ctx, simulation_state)
+    draw_state_indicator(ctx)
     pygame.display.flip()

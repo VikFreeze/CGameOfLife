@@ -1,28 +1,15 @@
 # app/patterns.py
-# ─────────────────────────────────────────────────────────────────────────────
-# 1.  Use a tiny Pattern data‑class that stores the cell‑matrix,
-#     a short title and a human‑readable description.
-# 2.  All patterns are defined as 2‑D ``numpy`` bool‑arrays.
-# 3.  A convenience list ``ALL_PATTERNS`` is exported for the gallery.
-
-from dataclasses import dataclass
 import numpy as np
 
-# --------------------------------------------------------------------------- #
-@dataclass
 class Pattern:
-    """Single pattern definition used by the gallery."""
-    name: str                      # internal id – useful for debugging
-    cells: np.ndarray              # 2‑D bool array (True = alive)
-    title: str                     # short name shown in the gallery
-    description: str               # tooltip / longer explanation
+    def __init__(self, name, cells, title, description):
+        self.name: str         = name                 # internal id – useful for debugging
+        self.cells: np.ndarray = cells                # 2‑D bool array (True = alive)
+        self.title: str        = title                # short name shown in the gallery
+        self.description: str  = description          # longer explanation
 
-
-# --------------------------------------------------------------------------- #
-# Pattern definitions ---------------------------------------------------------
-# Each cell‑matrix uses ``True`` for an alive cell and ``False`` for empty.
-
-# --- GLIDER --------------------------------------------------------------- #
+# Pattern definitions, each cell‑matrix uses ``True`` for an alive cell and ``False`` for dead.
+# GLIDER
 GLIDER = Pattern(
     name="glider",
     cells=np.array([[False, True,  False],
@@ -32,7 +19,7 @@ GLIDER = Pattern(
     description="A small spaceship that moves diagonally."
 )
 
-# --- BLINKER -------------------------------------------------------------- #
+# BLINKER
 BLINKER = Pattern(
     name="blinker",
     cells=np.array([[True,  True,  True]], dtype=bool),
@@ -40,7 +27,7 @@ BLINKER = Pattern(
     description="The simplest oscillator – it flips back and forth."
 )
 
-# --- PULSAR --------------------------------------------------------------- #
+# PULSAR
 PULSAR = Pattern(
     name="pulsar",
     cells=np.array([
@@ -54,6 +41,5 @@ PULSAR = Pattern(
     description="A large oscillator that cycles every 3 generations."
 )
 
-# --- Add more patterns here – they’ll appear automatically in the gallery. #
-# --------------------------------------------------------------------------- #
-ALL_PATTERNS = [GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR, GLIDER, BLINKER, PULSAR]
+# Add more patterns here – they’ll appear automatically in the gallery. #
+ALL_PATTERNS = [GLIDER, BLINKER, PULSAR]

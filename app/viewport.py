@@ -1,16 +1,15 @@
 # app/viewport.py
-from dataclasses import dataclass
-from config import MIN_CELL_SIZE, MAX_CELL_SIZE
+from config import DEFAULT_CELL_SIZE, MIN_CELL_SIZE, MAX_CELL_SIZE
 
-@dataclass
 class Viewport:
-    cell_size: int
-    offset_x: int
-    offset_y: int
-    grid_width: int
-    grid_height: int
-    window_width: int
-    window_height: int
+    def __init__(self, window_width, window_height):
+        self.cell_size = DEFAULT_CELL_SIZE
+        self.offset_x = 0
+        self.offset_y = 0
+        self.grid_width = window_width
+        self.grid_height = window_height
+        self.window_width = window_width
+        self.window_height = window_height
 
     def apply_zoom_at(self, ctx, delta: int, mouse_position: tuple):
         # Check if new zoom level is valid

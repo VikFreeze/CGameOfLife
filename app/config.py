@@ -1,15 +1,9 @@
 # app/config.py
-import pygame
 
 # Window
-WINDOW_HORIZONTAL_BORDER = 6 + 6 + 1
-WINDOW_VERTICAL_BORDER = 27 + 36
 WINDOW_WIDTH = 1920
 WINDOW_HEIGHT = 1080
 FPS = 60
-
-# UI
-PREVIEW_CELL = 20
 
 # Grid
 DEFAULT_CELL_SIZE = 1          # 1 cell == 1 pixel
@@ -17,7 +11,5 @@ MIN_CELL_SIZE = 1
 MAX_CELL_SIZE = 32
 
 # Colours
-BG_COLOR = (0, 0, 0)
 CELL_DEAD_COLOR = (0, 0, 0)
 CELL_ALIVE_COLOR = (255, 255, 255)
-PANEL_BG_COLOR = (50, 50, 50)

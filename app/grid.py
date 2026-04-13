@@ -1,36 +1,18 @@
 # app/grid.py
-from __future__ import annotations
-import random
 import numpy as np
-from dataclasses import dataclass, field
-from typing import List
-
 from numba import njit, prange
 
-@dataclass
 class Grid:
-    width: int
-    height: int
-    cells: np.ndarray = field(init=False)
-
-    def __post_init__(self):
-        # 0 = dead, 1 = alive
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
         self.cells = np.zeros((self.height, self.width), dtype=np.uint8)
-
-    def reset(self, pattern: List[List[int]] | None = None):
-        """Clear grid or load a binary pattern (1 = alive)."""
+    
+    def reset(self):
         self.cells[:] = 0
-        if pattern:
-            for y, row in enumerate(pattern):
-                for x, val in enumerate(row):
-                    if 0 <= x < self.width and 0 <= y < self.height:
-                        self.cells[y + 10, x + 10] = 1
-
-    def randomize(self, density: float = 0.3):
-        self.cells = (np.random.rand(self.height, self.width) < density).astype(np.uint8)
 
     def tick(self):
-        """Compute the next generation – JIT‑accelerated."""
+        # Compute the next generation – JIT‑accelerated.
         self.cells = _tick_numba(self.cells)
 
 @njit(parallel=True)
