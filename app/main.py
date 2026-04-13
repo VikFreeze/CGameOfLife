@@ -1,14 +1,14 @@
 # app/main.py
 import pygame
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, FPS
-from grid import Grid
+from grid import Grid, WarmUp
 from viewport import Viewport
 from context import AppContext, AppState
 from events import InputHandler
 from renderer import Draw
 
-
 def main():
+    WarmUp(WINDOW_WIDTH, WINDOW_HEIGHT)
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Conway’s Game of Life")

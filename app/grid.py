@@ -15,6 +15,10 @@ class Grid:
         # Compute the next generation – JIT‑accelerated.
         self.cells = _tick_numba(self.cells)
 
+def WarmUp(width, height):
+    # call the numba function to force it to compile so the simulation runs immediately
+    _tick_numba(np.zeros((height, width), dtype=np.uint8))
+
 @njit(parallel=True)
 def _tick_numba(cells: np.ndarray) -> np.ndarray:
     h, w = cells.shape
