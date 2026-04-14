@@ -8,16 +8,18 @@ from events import InputHandler
 from renderer import Draw
 
 def main():
+    # Kickstart jit on the tick function
     WarmUp(WINDOW_WIDTH, WINDOW_HEIGHT)
+
+    # Initialize window
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Conway’s Game of Life")
     clock = pygame.time.Clock()
 
-    # grid & viewport
+    # grid, viewport, context and inputs
     grid = Grid(WINDOW_WIDTH, WINDOW_HEIGHT)
     viewport = Viewport(WINDOW_WIDTH, WINDOW_HEIGHT)
-
     ctx = AppContext(screen, grid, viewport)
     inputs = InputHandler(ctx)
 

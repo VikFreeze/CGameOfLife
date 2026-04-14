@@ -7,12 +7,12 @@ from patterns import ALL_PATTERNS
     
 class AppContext:
     def __init__(self, screen: pygame.Surface, grid: Grid, viewport: Viewport):
-        self.screen       = screen
-        self.grid         = grid
-        self.viewport     = viewport
-        self.fullscreen = False
+        self.screen          = screen
+        self.grid            = grid
+        self.viewport        = viewport
+        self.fullscreen      = False
         self.state: AppState = AppState.PAUSED
-        self.patterns = ALL_PATTERNS
+        self.patterns        = ALL_PATTERNS
 
 class AppState(Enum):
     PAUSED          = auto()   # Simulation is paused

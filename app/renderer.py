@@ -1,47 +1,38 @@
 # app/renderer.py
 import pygame
+import numpy as np
 from context import AppState
-from config import *
+from config import CELL_ALIVE_COLOR, CELL_DEAD_COLOR
 
 def render_grid(surface: pygame.Surface, grid, cell_size: int, offset: tuple):
-    grid_surf = pygame.Surface((grid.width * cell_size, grid.height * cell_size))
-    grid_surf.fill(CELL_DEAD_COLOR)
+    # Grid cells to surface
+    alive_color = np.array([CELL_ALIVE_COLOR], dtype=np.uint8)
+    dead_color = np.array([CELL_DEAD_COLOR], dtype=np.uint8)
+    rgb_grid = np.where(grid.cells[:, :, None] == 1, alive_color, dead_color)
+    grid_surface = pygame.surfarray.make_surface(rgb_grid.swapaxes(0, 1))
 
-    # Draw every alive cell once on the grid surface
-    alive = CELL_ALIVE_COLOR
-    for y, row in enumerate(grid.cells):
-        for x, flag in enumerate(row):
-            if flag:
-                rect = pygame.Rect(x * cell_size, y * cell_size, cell_size, cell_size)
-                grid_surf.fill(alive, rect)
+    # 2 x 2 tile to enable toroidal viewport behaviour
+    gw, gh = grid_surface.get_size()
+    wrap_surf = pygame.Surface((gw * 2, gh * 2))
+    wrap_surf.blit(grid_surface, (0, 0))
+    wrap_surf.blit(grid_surface, (gw, 0))
+    wrap_surf.blit(grid_surface, (0, gh))
+    wrap_surf.blit(grid_surface, (gw, gh))
 
-    # ------------------------------------------------------------------
-    # 2. Create a wrapped surface (2× in each dimension) so that any
-    #    offset can be satisfied with a single blit.
-    # ------------------------------------------------------------------
-    wrap_surf = pygame.Surface((grid_surf.get_width() * 2, grid_surf.get_height() * 2))
-    wrap_surf.blit(grid_surf, (0, 0))
-    wrap_surf.blit(grid_surf, (grid_surf.get_width(), 0))
-    wrap_surf.blit(grid_surf, (0, grid_surf.get_height()))
-    wrap_surf.blit(grid_surf, (grid_surf.get_width(), grid_surf.get_height()))
+    # Scale offset down to native resolution
+    ox, oy = offset[0] // cell_size, offset[1] // cell_size
 
-    # ------------------------------------------------------------------
-    # 3. Compute the rectangle that the viewport wants to see.  Because
-    #    we have a 2× tiled surface we can simply take a sub‑rect that
-    #    starts at (offset_x % total_width, offset_y % total_height).
-    # ------------------------------------------------------------------
-    total_w = wrap_surf.get_width()
-    total_h = wrap_surf.get_height()
+    # The viewport in native pixels
+    view_w_native = surface.get_width() // cell_size
+    view_h_native = surface.get_height() // cell_size
 
-    src_x = offset[0] % (grid.width * cell_size)
-    src_y = offset[1] % (grid.height * cell_size)
+    # Clamp coordinates to native resolution
+    ox %= gw
+    oy %= gh
 
-    viewport_rect = pygame.Rect(src_x, src_y, surface.get_width(), surface.get_height())
-
-    # ------------------------------------------------------------------
-    # 4. Finally blit the required portion onto the screen.
-    # ------------------------------------------------------------------
-    surface.blit(wrap_surf, (0, 0), viewport_rect)
+    # Calculate the area to be shown in the viewport and copy it to the screen
+    src_rect = pygame.Rect(ox, oy, view_w_native, view_h_native)
+    surface.blit(pygame.transform.scale(wrap_surf.subsurface(src_rect), surface.get_size()), (0, 0))
 
 def draw_state_indicator(ctx):
     font = pygame.font.SysFont(None, 36)

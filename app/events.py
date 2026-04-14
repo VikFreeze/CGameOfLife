@@ -1,11 +1,11 @@
 # app/events.py
 import pygame
 from context import AppState
+from config import WINDOW_WIDTH, WINDOW_HEIGHT
 
 class InputHandler:
     def __init__(self, ctx):
         self.ctx = ctx
-        # self.pressed_keys = set()
         self.dragging = False
         self.drag_button = 0
 
@@ -77,9 +77,7 @@ class InputHandler:
         return False
     
     def _set_cell_from_pos(self, pos, button):
-        mx, my = pos
         # Translate pixel to grid index with wrapping
-        cx = ((mx + self.ctx.viewport.offset_x) // self.ctx.viewport.cell_size) % self.ctx.grid.width
-        cy = ((my + self.ctx.viewport.offset_y) // self.ctx.viewport.cell_size) % self.ctx.grid.height
-
+        cx = ((pos[0] + self.ctx.viewport.offset_x) // self.ctx.viewport.cell_size) % self.ctx.grid.width
+        cy = ((pos[1] + self.ctx.viewport.offset_y) // self.ctx.viewport.cell_size) % self.ctx.grid.height
         self.ctx.grid.cells[cy, cx] = 1 if button == 1 else 0
