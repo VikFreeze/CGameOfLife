@@ -2,7 +2,7 @@
 import pygame
 import numpy as np
 from context import AppState
-from config import CELL_ALIVE_COLOR, CELL_DEAD_COLOR
+from config import CELL_ALIVE_COLOR, CELL_DEAD_COLOR, WINDOW_WIDTH, WINDOW_HEIGHT
 
 def render_grid(surface: pygame.Surface, grid, cell_size: int, offset: tuple):
     # Grid cells to surface
@@ -31,12 +31,12 @@ def render_grid(surface: pygame.Surface, grid, cell_size: int, offset: tuple):
     oy %= gh
 
     # Calculate the area to be shown in the viewport and copy it to the screen
-    src_rect = pygame.Rect(ox, oy, view_w_native, view_h_native)
+    src_rect = pygame.Rect(ox, oy, min(view_w_native, WINDOW_WIDTH), min(view_h_native, WINDOW_HEIGHT))
     surface.blit(pygame.transform.scale(wrap_surf.subsurface(src_rect), surface.get_size()), (0, 0))
 
 def draw_state_indicator(ctx):
     font = pygame.font.SysFont(None, 36)
-    text = "RUNNING" if ctx.state == AppState.RUNNING else "PAUSED"
+    text = f'State: {"RUNNING" if ctx.state == AppState.RUNNING else "PAUSED"}  Speed: {ctx.ticks_per_second()}'
     color = (255, 255, 255)   # white
     surface = font.render(text, True, color)
 

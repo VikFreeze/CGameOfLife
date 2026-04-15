@@ -10,6 +10,10 @@ class Grid:
     
     def reset(self):
         self.cells[:] = 0
+    
+    def randomize(self, temperature: float = 0.3):
+        temp = max(0.0, min(1.0, temperature))
+        self.cells[:] = np.random.binomial(1, temp, size=(self.height, self.width)).astype(np.uint8)
 
     def tick(self):
         # Compute the next generation – JIT‑accelerated.
