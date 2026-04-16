@@ -5,6 +5,9 @@ WINDOW_WIDTH = 1920
 WINDOW_HEIGHT = 1080
 FPS = 60
 
+# Accelerator CPU/GPU
+RENDER_ON = "CPU"
+
 # Grid zoom
 DEFAULT_CELL_SIZE = 1            # 1 cell == 1 pixel
 MIN_CELL_SIZE = 1
