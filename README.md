@@ -177,6 +177,8 @@ Check out the Wikipedia article [here](https://en.wikipedia.org/wiki/Conway's_Ga
 
 ---
 
+## Personal motivation
+
 For the project’s history and the author’s original motivation, see [History.md](/History.md).
 
 ---
