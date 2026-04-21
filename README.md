@@ -13,12 +13,12 @@
 
 | Section | Description |
 |---------|-------------|
-| [Introduction](#introduction) | What this project is and why it matters |
-| [Technology Stack](#technology-stack) | Pygame, uv, Numba – why we chose them |
+| [Introduction](#-introduction) | What this project is and why it matters |
+| [Technology Stack](#%EF%B8%8F-technology-stack) | Pygame, uv, Numba – why we chose them |
 | [Technical Challenges & Optimisations](#technical-challenges--optimisations) | Parallelisation, Numba, blitting & toroidal logic |
-| [Getting Started – Run the App](#getting-started--run-the-app) | OS‑agnostic instructions for end users |
+| [Getting Started – Run the App](#%EF%B8%8F-getting-started--run-the-app) | OS‑agnostic instructions for end users |
 | [Getting Started – Development](#getting-started--development) | How to clone, build, and extend the code |
-| [Controls](#controls) | Keyboard & mouse shortcuts |
+| [Controls](#-controls) | Keyboard & mouse shortcuts |
 | [About Conway’s Game of Life](#about-conways-game-of-life) | History, patterns, and biological parallels |
 | [Personal Motivation](#personal-motivation) | From Turbo Pascal to modern Python |
 | [Future Work](#future-work) | Planned gallery UI & other enhancements |
@@ -71,7 +71,7 @@ The goal is to provide an educational sandbox for both beginners and researchers
 2. **Blitting vs. Per-Pixel Drawing**  
    Drawing each cell individually is extremely slow, instead, the `render_grid` function builds a pre-generated surface containing the whole grid then uses that to builds a 2 x 2 tile and then copies and scales the relevant section to the screen. This, along with some modulo arithmetic, handles toroidal (wrap‑around) coordinates, ensuring seamless panning and zooming.  
 
-   > *Source:* Rendering logic and toroidal handling are in `renderer.py` [1].
+   > *Source:* Rendering logic and toroidal handling are in `renderer.py`.
 
 3. **Wrap-Around (Toroidal) Grid**  
    The simulation treats the grid as a torus: cells on the edge see neighbours on the opposite edge.  All neighbour calculations use `% WIDTH` / `% HEIGHT`.
@@ -103,7 +103,7 @@ The goal is to provide an educational sandbox for both beginners and researchers
    ```
 
 Drag the window to the desired monitor and hit `F11` for full screen.  Press `Space` to start/stop the simulation, `N` to step one tick, and use the mouse to paint cells.
-See [Controls](#controls) section for more information
+See [Controls](#-controls) section for more information
 
 ---
 
@@ -171,7 +171,9 @@ Despite its simplicity, the system exhibits:
 * **Self-organising patterns** (e.g., gliders, pulsars).  
 * **Computational universality** – it can emulate a universal Turing machine.  
 * **Biologically analogous behaviour** – some patterns mimic cellular growth, bacterial colonies, or even social dynamics.  
-* **Infinite possibilities** – new patterns can be discovered endlessly, its even possible to create the Game of Life inside the Game of Life
+* **Infinite possibilities** – new patterns can be discovered endlessly, its even possible to create the Game of Life inside the Game of Life, you can see that [here](https://www.youtube.com/watch?v=xP5-iIeKXE8)
+
+Check out the Wikipedia article [here](https://en.wikipedia.org/wiki/Conway's_Game_of_Life) for more information and patterns.
 
 ---
 
@@ -200,5 +202,7 @@ Here are a few patterns that i came across during development:
 1. In a empty grid, zoom in and make a plus sign with 5 cells but leave the middle dead, so 4 live cells and the one in the middle dead then hit space to run the simulation. And as you can see, you see nothing, this pattern is stable and does not change.
 2. To get to the next step, place a live cell right under the lowest live cell on the grid, making a cross shape, you can pause to do this and step thru with N or do it while the simulation is running. Either way if you did it right, in 2 ticks you should get a oval shape, another stable pattern.
 3. Again, as before, place one live cell right under the lowest live cell on the grid. If you did it right, in 16 ticks, you will be presented with four ovals in a radial pattern, this is the final stable pattern.
-4. Third times the charm, one last time, place one live cell right below the lowest live cell on the grid, then watch the resulting reaction.
+4. Third times the charm, one last time, place one live cell right below the lowest live cell on the grid, then watch the resulting reaction.  
+
+![Pattern Steps](https://github.com/VikFreeze/CGameOfLife/blob/main/images/readme/Pattern.png?raw=true)  
 ![SSJ Goku](https://github.com/VikFreeze/CGameOfLife/blob/main/images/readme/ssj_goku.gif?raw=true)
